@@ -1,0 +1,2 @@
+# Only third-party dependency. Everything else is the Python 3.11+ standard library.
+PyYAML>=6.0

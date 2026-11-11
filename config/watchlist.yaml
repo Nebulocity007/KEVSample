@@ -1,0 +1,275 @@
+# Watchlist: technologies assumed common in financial-institution estates.
+#
+# SOURCING - read this before quoting anything from the brief:
+#   * WHICH products are listed and HOW MUCH each weighs is analyst judgment.
+#     It has NOT been validated against member inventories, surveys or
+#     internet-exposure data. Every entry says so: `prevalence: analyst-judgment`.
+#     (See README "Watchlist provenance" for how to validate it.)
+#   * `evidence` lists KEV CVE IDs showing the product family is actively
+#     exploited. These are machine-checked: every ID must exist in the loaded
+#     KEV data AND match this entry at product level (fin_ti/score.py
+#     verify_evidence; run `python -m fin_ti score`).
+#   * `advisories` are optional public CISA advisories. They are not checked
+#     automatically (offline-first), so re-check URLs before external use.
+#   * `rationale` is a one-line judgment of why the product matters to FS.
+#
+# Matching (fin_ti/score.py): case-insensitive whole-word match of `vendor` in
+# KEV vendorProject and of any `products` keyword in KEV product.
+#   product match              -> full `weight`
+#   vendor match only          -> flat `vendor_only_points`
+#   internet_facing + product  -> +`internet_facing_points`
+
+vendor_only_points: 10
+internet_facing_points: 15
+
+entries:
+  # --- Edge / remote access (VPN, ADC, firewalls) --------------------------
+  - id: citrix-netscaler
+    vendor: Citrix
+    products: [NetScaler, ADC, Gateway]
+    category: edge
+    internet_facing: true
+    weight: 40
+    prevalence: analyst-judgment
+    evidence: [kev:CVE-2023-4966, kev:CVE-2025-5777]
+    advisories: [https://www.cisa.gov/news-events/cybersecurity-advisories/aa23-325a]
+    rationale: Common remote-access front end; LockBit affiliates exploited Citrix Bleed (AA23-325A).
+  - id: fortinet-edge
+    vendor: Fortinet
+    products: [FortiOS, FortiGate, FortiProxy, FortiManager, FortiWeb, FortiClient EMS]
+    category: edge
+    internet_facing: true
+    weight: 40
+    prevalence: analyst-judgment
+    evidence: [kev:CVE-2018-13379, kev:CVE-2024-55591]
+    rationale: Assumed common firewall/VPN at mid-size institutions; repeat KEV vendor.
+  - id: ivanti-edge
+    vendor: Ivanti
+    products: [Connect Secure, Policy Secure, Pulse, EPMM, Endpoint Manager]
+    category: edge
+    internet_facing: true
+    weight: 40
+    prevalence: analyst-judgment
+    evidence: [kev:CVE-2024-21887, kev:CVE-2025-0282]
+    advisories: [https://www.cisa.gov/news-events/cybersecurity-advisories/aa24-060b]
+    rationale: Widely deployed VPN; repeated mass-exploitation waves (AA24-060B).
+  - id: paloalto-panos
+    vendor: Palo Alto Networks
+    products: [PAN-OS, GlobalProtect, Expedition]
+    category: edge
+    internet_facing: true
+    weight: 40
+    prevalence: analyst-judgment
+    evidence: [kev:CVE-2024-3400]
+    rationale: Assumed standard perimeter firewall at large institutions.
+  - id: cisco-edge
+    vendor: Cisco
+    products: [ASA, Adaptive Security, Firepower, FTD, IOS XE, AnyConnect, Secure Client, ISE]
+    category: edge
+    internet_facing: true
+    weight: 35
+    prevalence: analyst-judgment
+    evidence: [kev:CVE-2023-20198]
+    rationale: Assumed network/VPN backbone across the sector.
+  - id: f5-bigip
+    vendor: F5
+    products: [BIG-IP]
+    category: edge
+    internet_facing: true
+    weight: 35
+    prevalence: analyst-judgment
+    evidence: [kev:CVE-2022-1388]
+    rationale: Load balancer commonly placed in front of customer-facing web apps and APIs.
+  - id: sonicwall
+    vendor: SonicWall
+    products: [SonicOS, SMA, SSLVPN]
+    category: edge
+    internet_facing: true
+    weight: 30
+    prevalence: analyst-judgment
+    evidence: [kev:CVE-2024-40766]
+    rationale: Assumed common at smaller institutions; KEV lists known ransomware use.
+  - id: checkpoint
+    vendor: Check Point
+    products: [Quantum, Security Gateway, CloudGuard]
+    category: edge
+    internet_facing: true
+    weight: 30
+    prevalence: analyst-judgment
+    evidence: [kev:CVE-2024-24919]
+    rationale: Enterprise firewall/VPN.
+
+  # --- Email, collaboration ------------------------------------------------
+  - id: ms-exchange
+    vendor: Microsoft
+    products: [Exchange]
+    category: email
+    internet_facing: true
+    weight: 40
+    prevalence: analyst-judgment
+    evidence: [kev:CVE-2021-26855]
+    rationale: Assumes some on-prem Exchange persists in regulated environments.
+  - id: ms-sharepoint
+    vendor: Microsoft
+    products: [SharePoint]
+    category: collaboration
+    internet_facing: true
+    weight: 30
+    prevalence: analyst-judgment
+    evidence: [kev:CVE-2025-53770]
+    rationale: On-prem document collaboration; assumed retained for data-residency reasons.
+  - id: barracuda-esg
+    vendor: Barracuda
+    products: [Email Security Gateway, ESG]
+    category: email
+    internet_facing: true
+    weight: 30
+    prevalence: analyst-judgment
+    evidence: [kev:CVE-2023-2868]
+    rationale: Email gateway; exploited in an espionage campaign (KEV-listed).
+  - id: atlassian
+    vendor: Atlassian
+    products: [Confluence, Jira, Bitbucket]
+    category: collaboration
+    internet_facing: false
+    weight: 25
+    prevalence: analyst-judgment
+    evidence: [kev:CVE-2023-22515]
+    rationale: Engineering/knowledge platforms that hold sensitive internal data.
+
+  # --- Managed file transfer (data-theft extortion target) ------------------
+  - id: mft
+    vendor: Progress
+    products: [MOVEit]
+    category: file-transfer
+    internet_facing: true
+    weight: 40
+    prevalence: analyst-judgment
+    evidence: [kev:CVE-2023-34362]
+    advisories: [https://www.cisa.gov/news-events/cybersecurity-advisories/aa23-158a]
+    rationale: Mass data-theft campaign by Cl0p (AA23-158A); MFT carries regulated data.
+  - id: fortra-goanywhere
+    vendor: Fortra
+    products: [GoAnywhere]
+    category: file-transfer
+    internet_facing: true
+    weight: 35
+    prevalence: analyst-judgment
+    evidence: [kev:CVE-2023-0669]
+    rationale: MFT; KEV lists known ransomware use.
+  - id: cleo
+    vendor: Cleo
+    # KEV lists Cleo as "Multiple Products"; every Cleo product is MFT, so it counts.
+    products: [Harmony, VLTrader, LexiCom, Multiple Products]
+    category: file-transfer
+    internet_facing: true
+    weight: 35
+    prevalence: analyst-judgment
+    evidence: [kev:CVE-2024-55956]
+    rationale: MFT; KEV lists known ransomware use.
+  - id: ibm-aspera
+    vendor: IBM
+    products: [Aspera]
+    category: file-transfer
+    internet_facing: true
+    weight: 30
+    prevalence: analyst-judgment
+    evidence: [kev:CVE-2022-47986]
+    rationale: Bulk data transfer between institutions and vendors.
+
+  # --- Remote management (third-party / MSP risk) ---------------------------
+  - id: rmm
+    vendor: ConnectWise
+    products: [ScreenConnect]
+    category: remote-mgmt
+    internet_facing: true
+    weight: 30
+    prevalence: analyst-judgment
+    evidence: [kev:CVE-2024-1709]
+    rationale: Assumed common among MSPs serving smaller institutions; supply-chain path.
+  - id: beyondtrust
+    vendor: BeyondTrust
+    products: [Remote Support, Privileged Remote Access]
+    category: remote-mgmt
+    internet_facing: true
+    weight: 30
+    prevalence: analyst-judgment
+    evidence: [kev:CVE-2024-12356]
+    rationale: Privileged remote-access tooling; compromise grants admin-level reach.
+
+  # --- Virtualization, backup, middleware ----------------------------------
+  - id: vmware
+    vendor: VMware
+    products: [vCenter, ESXi, Workspace ONE, Aria, Tools]
+    category: infrastructure
+    internet_facing: false
+    weight: 35
+    prevalence: analyst-judgment
+    evidence: [kev:CVE-2024-37085]
+    rationale: Hypervisors are high-value ransomware encryption targets.
+  - id: veeam
+    vendor: Veeam
+    products: [Backup]
+    category: infrastructure
+    internet_facing: false
+    weight: 35
+    prevalence: analyst-judgment
+    evidence: [kev:CVE-2023-27532]
+    rationale: Backup destruction precedes ransomware; resilience is a regulatory focus.
+  - id: oracle-apps
+    vendor: Oracle
+    products: [WebLogic, E-Business Suite]
+    category: middleware
+    internet_facing: true
+    weight: 30
+    prevalence: analyst-judgment
+    evidence: [kev:CVE-2025-61882]
+    rationale: ERP/back-office middleware; KEV lists known ransomware use.
+  - id: apache
+    vendor: Apache
+    # "Log4j2" listed separately: whole-word matching does not treat Log4j as Log4j2.
+    products: [Log4j, Log4j2, Struts, ActiveMQ, Tomcat, HTTP Server]
+    category: middleware
+    internet_facing: false
+    weight: 30
+    prevalence: analyst-judgment
+    evidence: [kev:CVE-2021-44228]
+    rationale: Embedded throughout bespoke enterprise applications.
+  - id: sap
+    vendor: SAP
+    products: [NetWeaver]
+    category: middleware
+    internet_facing: true
+    weight: 30
+    prevalence: analyst-judgment
+    evidence: [kev:CVE-2025-31324]
+    rationale: ERP/finance back office at large institutions.
+
+  # --- Endpoints (broad exposure) -------------------------------------------
+  - id: ms-windows
+    vendor: Microsoft
+    products: [Windows, Win32k]
+    category: endpoint
+    internet_facing: false
+    weight: 25
+    prevalence: analyst-judgment
+    evidence: [kev:CVE-2023-28252]
+    rationale: Standard workstation/server OS; privilege-escalation bugs used post-compromise.
+  - id: ms-office
+    vendor: Microsoft
+    products: [Office, Outlook, Word, Excel]
+    category: endpoint
+    internet_facing: false
+    weight: 20
+    prevalence: analyst-judgment
+    evidence: []
+    rationale: Standard productivity suite; malicious-document delivery.
+  - id: browsers
+    vendor: Google
+    products: [Chromium, Chrome]
+    category: endpoint
+    internet_facing: false
+    weight: 15
+    prevalence: analyst-judgment
+    evidence: [kev:CVE-2024-4671]
+    rationale: Standard enterprise browser engine (also underlies Edge).

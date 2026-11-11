@@ -1,0 +1,110 @@
+# ATT&CK tagging rules (MITRE ATT&CK Enterprise).
+#
+# A rule fires if ANY of its `when` conditions match. Conditions:
+#   cwes:            KEV record lists one of these CWE IDs           (basis: evidence)
+#   keywords:        whole-word phrase in vulnerability name/desc    (basis: evidence)
+#   products:        whole-word phrase in vendor/product             (basis: inference)
+#   categories:      category of the best watchlist hit              (basis: inference)
+#   internet_facing: best watchlist hit is an internet-facing product (basis: inference)
+#   ransomware:      CISA reports known ransomware campaign use      (basis: inference)
+#
+# "evidence" = the record's own text says so; "inference" = we infer the technique
+# from context (what the product is or how it's typically abused). The basis
+# feeds into the confidence level, and each tag shows which condition fired.
+#
+# These tags describe the technique that exploiting the vulnerability most
+# plausibly enables. They are not observed adversary behavior.
+
+rules:
+  - id: R01
+    technique: T1190
+    name: Exploit Public-Facing Application
+    tactic: Initial Access
+    when:
+      internet_facing: true
+      keywords: [unauthenticated remote, unauthenticated attacker, remote unauthenticated]
+    rationale: Internet-exposed product, or exploitation requires no authentication over the network.
+
+  - id: R02
+    technique: T1133
+    name: External Remote Services
+    tactic: Initial Access, Persistence
+    when:
+      categories: [edge]
+      keywords: [VPN, SSL VPN, remote access]
+    rationale: VPN/remote-access gateways give attackers the same entry point as staff.
+
+  - id: R03
+    technique: T1059
+    name: Command and Scripting Interpreter
+    tactic: Execution
+    when:
+      cwes: [CWE-77, CWE-78, CWE-94, CWE-917]
+      keywords: [command injection, OS command, code injection, arbitrary command]
+    rationale: Injection flaws hand the attacker a shell or interpreter on the target.
+
+  - id: R04
+    technique: T1068
+    name: Exploitation for Privilege Escalation
+    tactic: Privilege Escalation
+    when:
+      cwes: [CWE-269, CWE-250]
+      keywords: [privilege escalation, elevation of privilege, escalate privileges, gain SYSTEM privileges, root privileges]
+    rationale: Local escalation bugs turn a phished user session into admin/SYSTEM.
+
+  - id: R05
+    technique: T1203
+    name: Exploitation for Client Execution
+    tactic: Execution
+    when:
+      # Document handlers, not the whole "endpoint" category: an OS privilege
+      # escalation bug is not client execution.
+      products: [Office, Word, Excel, Outlook, PowerPoint, Acrobat, Reader, WinRAR, 7-Zip]
+      keywords: [crafted file, crafted document, malicious file, crafted HTML page, crafted web page]
+    rationale: Requires a user to open content, which is the classic phishing payload path.
+
+  - id: R06
+    technique: T1189
+    name: Drive-by Compromise
+    tactic: Initial Access
+    when:
+      products: [Chromium, Chrome, WebKit, Safari, Internet Explorer, Edge]
+    rationale: Browser engine bugs are exploited by luring users to a malicious site.
+
+  - id: R07
+    technique: T1212
+    name: Exploitation for Credential Access
+    tactic: Credential Access
+    when:
+      cwes: [CWE-522, CWE-256, CWE-200]
+      keywords: [session token, session hijacking, credentials, password hash, NTLM]
+    rationale: Bug leaks secrets (session tokens, hashes) that enable account takeover.
+
+  - id: R08
+    technique: T1505.003
+    name: "Server Software Component: Web Shell"
+    tactic: Persistence
+    when:
+      cwes: [CWE-434]
+      keywords: [web shell, webshell, upload arbitrary files, file upload]
+    rationale: Arbitrary file upload on a web server is the usual route to a web shell.
+
+  - id: R09
+    technique: T1210
+    name: Exploitation of Remote Services
+    tactic: Lateral Movement
+    when:
+      # Match the vulnerable product, not bare "RDP": that also appears in
+      # descriptions of VPN gateways that merely proxy RDP (false positive found
+      # on CVE-2026-19490, Citrix NetScaler).
+      products: [Remote Desktop, SMB, SMBv1, Netlogon, Print Spooler]
+      keywords: [SMBv1, Netlogon, Print Spooler]
+    rationale: Internal network services used to spread after initial access.
+
+  - id: R10
+    technique: T1486
+    name: Data Encrypted for Impact
+    tactic: Impact
+    when:
+      ransomware: true
+    rationale: CISA reports ransomware use, so the likely end state is encryption and extortion.
