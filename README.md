@@ -17,7 +17,7 @@ only third-party dependency.
 Snapshot from KEV catalog `2026.11.10` (as of 2026-11-10), readable without running anything:
 
 - **[Executive brief for a CISO](examples/brief_2026-11-10.md)**: one page, BLUF,
-  ICD 203 key judgments, Top 5 actions.
+  ICD 203 key judgments, top 5 priority vulnerabilities, recommended actions.
 - **[Tactical triage table](examples/tactical_2026-11-10.md)**: P1/P2 items with
   score, ATT&CK tags, likelihood, confidence and scoring reasons.
 
@@ -188,7 +188,7 @@ Each run writes to `output/` (gitignored); committed examples are in [`examples/
   likelihood, confidence and scoring reasons. TLP:CLEAR.
 - **`output/brief.md`** ([example](examples/brief_2026-11-10.md)): about one page with: BLUF, a "KEV shows exploitation, not
   targeting" caveat, three key judgments (edge exposure, ransomware, endpoints),
-  Top 5 grouped by product with an explicit tie-break rule, period counts with a
+  top 5 priority vulnerabilities grouped by product with an explicit tie-break rule, period counts with a
   "not a trend" caveat, recommended actions, and a method note.
 
 ---

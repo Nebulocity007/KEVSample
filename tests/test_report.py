@@ -23,8 +23,10 @@ class ReportTests(unittest.TestCase):
 
         self.assertIn("CVE-2023-4966", t)                      # Citrix Bleed is P1/P2
         self.assertIn("TLP:CLEAR", b)
-        for section in ("Bottom Line Up Front", "Key Judgments", "Top 5", "Method"):
+        for section in ("Bottom Line Up Front", "Key Judgments", "Priority Vulnerabilities",
+                        "Recommended Actions", "Method"):
             self.assertIn(section, b)
+        self.assertNotIn("Top 5 Actions", b)                   # was confused with actions list
         self.assertNotIn("almost certain", b)                  # ICD 203 cap holds
         self.assertIn("this category of vulnerability", b)     # brief-level question
         self.assertIn("exploitation, not targeting", b)

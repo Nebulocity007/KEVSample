@@ -181,7 +181,7 @@ def render_brief(recs: list[dict], meta: dict, as_of: date) -> str:
         f"inventories), **{len(edge90)}** of them internet-facing edge, email, file-transfer or "
         f"remote-management products. In KEV data, those categories account for "
         f"**{len(ransom_edge)} of {len(ransom)}** ransomware-linked watchlist KEVs (all-time). "
-        f"Patch or mitigate the Top 5 below first.",
+        f"Patch or mitigate the top {len(top5)} priority vulnerabilities below first.",
         "",
         "*Caveat: KEV shows exploitation, not targeting. Inclusion means a flaw was exploited "
         "somewhere, not that financial institutions were the targets.*",
@@ -208,15 +208,19 @@ def render_brief(recs: list[dict], meta: dict, as_of: date) -> str:
             "Endpoints", endpoint90,
             "threat actors will attempt to exploit recently added browser, Office or Windows "
             "KEVs against financial-sector staff"))
+    groups = group_by_product(top5)
     L += [
         "",
-        "## Top 5 Actions (added to KEV in last 90 days), grouped by product",
+        # Named "Vulnerabilities", not "Actions": the actions are a separate section,
+        # and grouping means the row count differs from 5, so state both counts.
+        f"## Top {len(top5)} Priority Vulnerabilities ({len(top5)} CVEs across "
+        f"{len(groups)} products, added to KEV in last 90 days)",
         "*Ranking: highest score first; ties broken by most recent KEV addition, then CVE ID.*",
         "",
         "| # | Product | CVEs (score, likelihood / confidence) | ATT&CK |",
         "|---|---|---|---|",
     ]
-    for i, (product, items) in enumerate(group_by_product(top5), 1):
+    for i, (product, items) in enumerate(groups, 1):
         cves = "; ".join(f"[{r['cve_id']}]({NVD.format(r['cve_id'])}) "
                          f"({r['score']}, {r['likelihood']} / {r['confidence']})" for r in items)
         # Union of techniques across the group, in first-seen order.
@@ -231,7 +235,8 @@ def render_brief(recs: list[dict], meta: dict, as_of: date) -> str:
         "not a direction.*",
         "",
         "## Recommended Actions",
-        "1. **Patch / mitigate** the Top 5 within 72 hours; if not possible, remove from "
+        f"1. **Patch / mitigate** the top {len(top5)} priority vulnerabilities above within "
+        "72 hours; if not possible, remove from "
         "internet exposure or enable vendor mitigations.",
         "2. **Hunt** for prior exploitation on edge devices (T1190/T1133): review VPN/ADC logs, "
         "integrity-check appliances, and rotate sessions and credentials where vendors advise.",
